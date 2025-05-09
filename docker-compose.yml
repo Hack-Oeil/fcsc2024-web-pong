@@ -1,0 +1,52 @@
+services:
+  pong-frontend:
+    image: anssi/fcsc2024-web-pong-frontend:latest
+    ports:
+      - ${PORT}:80
+    depends_on:
+      - pong-internal-dns
+    dns:
+      - 10.222.147.250
+    networks:
+      pong-network:
+        ipv4_address: 10.20.140.10
+
+  pong-internal-dns:
+    image: anssi/fcsc2024-web-pong-internal-dns:latest
+    networks:
+      pong-network:
+        ipv4_address: 10.222.147.250
+    environment:
+      - FLAG_DOMAIN=37b9da922f6360e301faeff19bac866c1a042d4a
+      - FRONTEND_IP=10.20.140.10
+      - BACKEND_IP=10.52.190.140
+      - FLAG_IP=10.148.74.253
+
+  pong-backend:
+    image: anssi/fcsc2024-web-pong-backend:latest
+    depends_on:
+      - pong-internal-dns
+    dns:
+      - 10.222.147.250
+    networks:
+      pong-network:
+        ipv4_address: 10.52.190.140
+
+  pong-flag:
+    image: anssi/fcsc2024-web-pong-flag:latest
+    depends_on:
+      - pong-internal-dns
+    dns:
+      - 10.222.147.250
+    networks:
+      pong-network:
+        ipv4_address: 10.148.74.253
+    environment:
+      - FLAG=FCSC{d8af233176d6ca50598a48fc47d8cadeae37b3d35a641efc1ad7777c86fe28a9}
+      - FLAG_DOMAIN=37b9da922f6360e301faeff19bac866c1a042d4a
+
+networks:
+  pong-network:
+    ipam:
+      config:
+        - subnet: 10.0.0.0/8
